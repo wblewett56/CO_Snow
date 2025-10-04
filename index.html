@@ -76,6 +76,45 @@
         }
         return gk_fileData[filename] || "";
         }
+        </script><script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
         </script><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,8 +125,9 @@
         body { background: black; color: white; font-family: monospace; text-align: center; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100vw; height: 90vh; }
         .grid:first-child { height: 90vh; }
-        .imagecontainer { position: relative; width: 100%; margin: 0; padding: 0; background: #333; border: 1px solid #555; display: flex; flex-direction: column; justify-content: center; }
-        img { width: 100%; max-width: 100%; max-height: 25vh; object-fit: contain; display: block; margin: auto; cursor: pointer; }
+        .imagecontainer { position: relative; width: 100%; margin: 0; padding: 0; background: #333; border: 1px solid #555; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        img { width: 98%; max-width: 98%; max-height: 98%; object-fit: contain; display: block; margin: auto; cursor: pointer; }
+        iframe { width: 98%; height: 98%; object-fit: contain; display: block; margin: auto; }
         .imagetitle { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); background: black; padding: 2px; font-size: 0.8rem; white-space: nowrap; z-index: 10; }
         .error { color: red; font-size: 0.8rem; padding: 5px; text-align: center; }
         #clock { position: fixed; bottom: 0; left: 0; right: 0; background: darkslategray; padding: 5px; height: 5vh; display: flex; align-items: center; justify-content: center; }
@@ -179,14 +219,7 @@
 <body>
     <div class="grid">
         <div class="imagecontainer" style="grid-column: span 2; grid-row: span 2;">
-            <iframe 
-                width="650" 
-                height="450" 
-                src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=mph&zoom=7&overlay=snowAccu&product=ecmwf&level=surface&lat=38.747&lon=-105.171&detailLat=39.468&detailLon=-106.162&detail=true"
-                frameborder="0"
-                style="width: 98%; height: 98%; border: none; border-radius: 15px; min-height: 80vh;"
-                title="ECMWF Powder Forecast: Snow Accumulation">
-            </iframe>
+            <iframe width="650" height="450" src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=7&overlay=snowAccu&product=ecmwf&level=surface&lat=38.885&lon=-107.782&detailLat=39.468&detailLon=-106.162&marker=true" frameborder="0"></iframe>
             <div class="imagetitle">Snow Precip Forecast</div>
         </div>
         <div class="imagecontainer" style="grid-column: 3; grid-row: 1 / span 1; min-height: 30vh;">
@@ -194,7 +227,7 @@
             <div class="imagetitle">CO Radar</div>
         </div>
         <div class="imagecontainer" style="grid-column: 3; grid-row: 2 / span 1; min-height: 30vh;">
-            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" style="width: 100%; height: 100%; object-fit: contain;" onclick="showFullScreen(this.src)">
+            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" style="width: 98%; height: 98%; object-fit: contain;" onclick="showFullScreen(this.src)">
             <div class="imagetitle">NOAA Weather Map</div>
         </div>
         <div class="imagecontainer" style="grid-column: 3; grid-row: 3 / span 1; min-height: 30vh; display: none;"> <!-- Hidden placeholder -->
