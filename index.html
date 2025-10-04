@@ -123,10 +123,10 @@
     <title>Weather Radar CO Dashboard</title>
     <style>
         body { background: black; color: white; font-family: monospace; text-align: center; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100vw; height: 90vh; }
+        .grid { display: grid; grid-template-columns: 2.5fr 0.5fr; gap: 2px; width: 100vw; height: 90vh; }
         .grid:first-child { height: 90vh; }
         .imagecontainer { position: relative; width: 100%; margin: 0; padding: 0; background: #333; border: 1px solid #555; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        img { width: 98%; max-width: 98%; max-height: 98%; object-fit: contain; display: block; margin: auto; cursor: pointer; }
+        img { width: 90%; max-width: 90%; max-height: 98%; object-fit: contain; display: block; margin: auto; cursor: pointer; }
         iframe { width: 98%; height: 98%; object-fit: contain; display: block; margin: auto; }
         .imagetitle { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); background: black; padding: 2px; font-size: 0.8rem; white-space: nowrap; z-index: 10; }
         .error { color: red; font-size: 0.8rem; padding: 5px; text-align: center; }
@@ -146,12 +146,12 @@
             #buttons { height: 6vh; gap: 1px; }
             button { font-size: 0.5rem; min-width: 40px; padding: 2px; margin: 0 1px; }
             .grid { grid-template-columns: 1fr; width: 100%; gap: 1px; }
-            .imagecontainer[style*="grid-column: span 2"] {
+            .imagecontainer[style*="grid-column: span 1"] {
                 grid-column: span 1;
                 grid-row: span 1;
                 min-height: 20vh;
             }
-            .imagecontainer[style*="min-height: 30vh"] {
+            .imagecontainer[style*="min-height: 20vh"] {
                 min-height: 20vh;
             }
             #clock { height: 4vh; }
@@ -173,24 +173,17 @@
             max-height: 90%;
         }
         /* Custom styling for spanning container */
-        .imagecontainer[style*="grid-column: span 2"] {
-            grid-column: span 2;
-            grid-row: span 2;
-            min-height: 80vh;
-        }
-        @media (max-width: 600px) {
-            .imagecontainer[style*="grid-column: span 2"] {
-                grid-column: span 1;
-                grid-row: span 1;
-                min-height: 20vh;
-            }
+        .imagecontainer[style*="grid-column: span 1"] {
+            grid-column: span 1;
+            grid-row: span 1;
+            min-height: 20vh;
         }
     </style>
     <script>
         function showTime() {
             const offset = -6; // UTC offset for MDT (Colorado)
             const now = new Date();
-            const utcTime = new Date(now.getTime() + offset * 3600000);
+            const utcTime = new Date(now.getTime() + offset * 3600000 + 3600000); // Adjust for CDT to MDT
             const localTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
             const utcStr = utcTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
             document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -218,19 +211,20 @@
 </head>
 <body>
     <div class="grid">
-        <div class="imagecontainer" style="grid-column: span 2; grid-row: span 2;">
-            <iframe width="650" height="450" src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=7&overlay=snowAccu&product=ecmwf&level=surface&lat=38.885&lon=-107.782&detailLat=39.468&detailLon=-106.162&marker=true" frameborder="0"></iframe>
+        <div class="imagecontainer" style="grid-column: 1 / span 1; grid-row: 1 / span 2;">
+            <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=7&overlay=snowAccu&product=ecmwf&level=surface&lat=38.885&lon=-107.782&detailLat=39.468&detailLon=-106.162&marker=true" frameborder="0"></iframe>
             <div class="imagetitle">Snow Precip Forecast</div>
+            <!-- Note: Use the slider to set to 'Next 24 hours' for the desired view -->
         </div>
-        <div class="imagecontainer" style="grid-column: 3; grid-row: 1 / span 1; min-height: 30vh;">
+        <div class="imagecontainer" style="grid-column: 2 / span 1; grid-row: 1 / span 1; min-height: 20vh;">
             <img src="https://radar.weather.gov/ridge/standard/KFTG_loop.gif" alt="CO Radar" onclick="showFullScreen(this.src)">
             <div class="imagetitle">CO Radar</div>
         </div>
-        <div class="imagecontainer" style="grid-column: 3; grid-row: 2 / span 1; min-height: 30vh;">
-            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" style="width: 98%; height: 98%; object-fit: contain;" onclick="showFullScreen(this.src)">
+        <div class="imagecontainer" style="grid-column: 2 / span 1; grid-row: 2 / span 1; min-height: 20vh;">
+            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" style="width: 90%; height: 98%; object-fit: contain;" onclick="showFullScreen(this.src)">
             <div class="imagetitle">NOAA Weather Map</div>
         </div>
-        <div class="imagecontainer" style="grid-column: 3; grid-row: 3 / span 1; min-height: 30vh; display: none;"> <!-- Hidden placeholder -->
+        <div class="imagecontainer" style="grid-column: 2 / span 1; grid-row: 3 / span 1; min-height: 30vh; display: none;"> <!-- Hidden placeholder -->
         </div>
     </div>
     <div id="clock">
