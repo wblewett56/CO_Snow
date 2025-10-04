@@ -1,0 +1,219 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Radar CO Dashboard</title>
+    <style>
+        body { background: black; color: white; font-family: monospace; text-align: center; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100vw; height: 90vh; }
+        .grid:first-child { height: 90vh; }
+        .imagecontainer { position: relative; width: 100%; margin: 0; padding: 0; background: #333; border: 1px solid #555; display: flex; flex-direction: column; justify-content: center; }
+        img { width: 100%; max-width: 100%; max-height: 25vh; object-fit: contain; display: block; margin: auto; cursor: pointer; }
+        .imagetitle { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); background: black; padding: 2px; font-size: 0.8rem; white-space: nowrap; z-index: 10; }
+        .error { color: red; font-size: 0.8rem; padding: 5px; text-align: center; }
+        #clock { position: fixed; bottom: 0; left: 0; right: 0; background: darkslategray; padding: 5px; height: 5vh; display: flex; align-items: center; justify-content: center; }
+        #date { font-size: 0.8rem; color: white; }
+        #utc { font-size: 1rem; color: yellow; }
+        #local { font-size: 0.8rem; color: lightsalmon; }
+        #buttons { position: fixed; bottom: 5vh; left: 0; right: 0; background: darkslategray; padding: 5px; height: 5vh; display: flex; align-items: center; justify-content: center; gap: 2px; overflow-x: auto; white-space: nowrap; }
+        button { font-size: 0.7rem; min-width: 50px; background: springgreen; border: none; color: black; padding: 3px; margin: 0 2px; }
+        @media (max-width: 600px) {
+            .grid:first-child { height: 80vh; }
+            .imagecontainer { min-height: 20vh; }
+            img, iframe { max-height: 18vh; }
+            .imagetitle { font-size: 0.6rem; top: 1%; padding: 1px; }
+            #date, #local { font-size: 0.6rem; }
+            #utc { font-size: 0.8rem; }
+            #buttons { height: 6vh; gap: 1px; }
+            button { font-size: 0.5rem; min-width: 40px; padding: 2px; margin: 0 1px; }
+            .grid { grid-template-columns: 1fr; width: 100%; gap: 1px; }
+            .imagecontainer[style*="grid-column: span 2"] {
+                grid-column: span 1;
+                grid-row: span 1;
+                min-height: 20vh;
+            }
+            .imagecontainer[style*="min-height: 30vh"] {
+                min-height: 20vh;
+            }
+            #clock { height: 4vh; }
+        }
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .fullscreen-image {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        /* Custom styling for spanning container */
+        .imagecontainer[style*="grid-column: span 2"] {
+            grid-column: span 2;
+            grid-row: span 2;
+            min-height: 80vh;
+        }
+        @media (max-width: 600px) {
+            .imagecontainer[style*="grid-column: span 2"] {
+                grid-column: span 1;
+                grid-row: span 1;
+                min-height: 20vh;
+            }
+        }
+    </style>
+    <script>
+        function showTime() {
+            const offset = -6; // UTC offset for MDT (Colorado)
+            const now = new Date();
+            const utcTime = new Date(now.getTime() + offset * 3600000);
+            const localTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const utcStr = utcTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            document.getElementById('utc').innerText = `UTC ${utcStr}`;
+            document.getElementById('local').innerText = localTime;
+            setTimeout(showTime, 1000);
+        }
+        window.onload = showTime;
+
+        function showFullScreen(imageSrc) {
+            const overlay = document.createElement('div');
+            overlay.className = 'fullscreen-overlay';
+            const img = document.createElement('img');
+            img.className = 'fullscreen-image';
+            img.src = imageSrc;
+            img.onclick = () => document.body.removeChild(overlay); // Close on image click
+            overlay.appendChild(img);
+            document.body.appendChild(overlay);
+            overlay.style.display = 'flex';
+            overlay.onclick = (e) => {
+                if (e.target === overlay) document.body.removeChild(overlay); // Close on overlay click
+            };
+        }
+    </script>
+</head>
+<body>
+    <div class="grid">
+        <div class="imagecontainer" style="grid-column: span 2; grid-row: span 2;">
+            <iframe 
+                width="650" 
+                height="450" 
+                src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=mph&zoom=10&overlay=snowAccu&product=ecmwf&level=surface&lat=39.6403&lon=-106.3742" 
+                frameborder="2"
+                style="width: 98%; height: 98%; border: true; border-radius: 15px; min-height: 80vh;"
+                title="ECMWF Powder Forecast: Snow Accumulation">
+            </iframe>
+            <div class="imagetitle">Snow Precip Forecast</div>
+        </div>
+        <div class="imagecontainer" style="grid-column: 3; grid-row: 1 / span 1; min-height: 30vh;">
+            <img src="https://radar.weather.gov/ridge/standard/KFTG_loop.gif" alt="CO Radar" onclick="showFullScreen(this.src)">
+            <div class="imagetitle">CO Radar</div>
+        </div>
+        <div class="imagecontainer" style="grid-column: 3; grid-row: 2 / span 1; min-height: 30vh;">
+            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" style="width: 100%; height: 100%; object-fit: contain;" onclick="showFullScreen(this.src)">
+            <div class="imagetitle">NOAA Weather Map</div>
+        </div>
+        <div class="imagecontainer" style="grid-column: 3; grid-row: 3 / span 1; min-height: 30vh; display: none;"> <!-- Hidden placeholder -->
+        </div>
+    </div>
+    <div id="clock">
+        <span id="date"></span> &nbsp; <span id="utc"></span> &nbsp; <span id="local"></span>
+    </div>
+    <div id="buttons">
+        <button onclick="window.open('https://www.arapahoebasin.com/mountain-cams/')">Abasin Cams</button>
+        <button onclick="window.open('https://www.coppercolorado.com/the-mountain/webcams?season=summer')">Copper Cams</button>
+        <button onclick="window.open('https://forecast.weather.gov/MapClick.php?lon=-106.16377257462592&lat=39.48701208217648')">Copper MTN 12,000FT</button>
+        <button onclick="window.open('https://www.wcc.nrcs.usda.gov/ftpref/support/states/CO/products/#state=co&element=wteq')">CO SNOWPACK</button>
+        <button onclick="window.open('https://www.weather.gov/bou/co_snowpack')">CO SNOWDEPTH</button>
+        <button onclick="window.open('https://www.avalanche.org')">Avalanche Bulletin</button>
+        <button onclick="window.open('https://www.colorado.gov/avalanche')">CAIC Avalanche Info</button>
+        <button onclick="window.open('https://powderchasers.com/')">Powderchasers</button>
+    </div>
+    <a href="https://www.opensnow.com/state/co" target="_blank" style="display: block; text-align: center; color: springgreen; font-size: 0.9rem; margin: 5px 0; text-decoration: none;">OpenSnow Colorado</a>
+    <a href="https://powderchasers.com/" target="_blank" style="display: block; text-align: center; color: springgreen; font-size: 0.9rem; margin: 0; text-decoration: none;">Powderchasers</a>
+</body>
+</html>
