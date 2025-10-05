@@ -1,44 +1,141 @@
-       </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Radar CO Dashboard</title>
     <style>
-        body { background: black; color: white; font-family: monospace; text-align: center; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
-        .grid { display: grid; grid-template-columns: 2.5fr 0.5fr; gap: 2px; width: 100vw; height: 90vh; }
-        .grid:first-child { height: 90vh; }
-        .imagecontainer { position: relative; width: 100%; margin: 0; padding: 0; background: #333; border: 1px solid #555; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        img { width: 90%; max-width: 90%; max-height: 98%; object-fit: contain; display: block; margin: auto; cursor: pointer; }
-        iframe { width: 98%; height: 98%; object-fit: contain; display: block; margin: auto; }
-        .imagetitle { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); background: black; padding: 2px; font-size: 0.8rem; white-space: nowrap; z-index: 10; }
-        .error { color: red; font-size: 0.8rem; padding: 5px; text-align: center; }
-        #clock { position: fixed; bottom: 0; left: 0; right: 0; background: darkslategray; padding: 5px; height: 5vh; display: flex; align-items: center; justify-content: center; }
-        #date { font-size: 0.8rem; color: white; }
-        #utc { font-size: 1rem; color: yellow; }
-        #local { font-size: 0.8rem; color: lightsalmon; }
-        #buttons { position: fixed; bottom: 5vh; left: 0; right: 0; background: darkslategray; padding: 5px; height: 5vh; display: flex; align-items: center; justify-content: center; gap: 2px; overflow-x: auto; white-space: nowrap; }
-        button { font-size: 0.7rem; min-width: 50px; background: springgreen; border: none; color: black; padding: 3px; margin: 0 2px; }
-        @media (max-width: 600px) {
-            .grid:first-child { height: 80vh; }
-            .imagecontainer { min-height: 20vh; }
-            img, iframe { max-height: 18vh; }
-            .imagetitle { font-size: 0.6rem; top: 1%; padding: 1px; }
-            #date, #local { font-size: 0.6rem; }
-            #utc { font-size: 0.8rem; }
-            #buttons { height: 6vh; gap: 1px; }
-            button { font-size: 0.5rem; min-width: 40px; padding: 2px; margin: 0 1px; }
-            .grid { grid-template-columns: 1fr; width: 100%; gap: 1px; }
-            .imagecontainer[style*="grid-column: span 1"] {
-                grid-column: span 1;
-                grid-row: span 1;
-                min-height: 20vh;
-            }
-            .imagecontainer[style*="min-height: 20vh"] {
-                min-height: 20vh;
-            }
-            #clock { height: 4vh; }
+        body {
+            background: black;
+            color: white;
+            font-family: monospace;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
         }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 2px;
+            width: 100vw;
+            height: 85vh;
+        }
+        .imagecontainer {
+            position: relative;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: #333;
+            border: 1px solid #555;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        img, iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+            cursor: pointer;
+        }
+        .imagetitle {
+            position: absolute;
+            top: 1%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            padding: 1px;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .error {
+            color: red;
+            font-size: 0.6rem;
+            padding: 5px;
+            text-align: center;
+        }
+        #clock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: darkslategray;
+            padding: 5px;
+            height: 4vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #date {
+            font-size: 0.6rem;
+            color: white;
+        }
+        #utc {
+            font-size: 0.8rem;
+            color: yellow;
+        }
+        #local {
+            font-size: 0.6rem;
+            color: lightsalmon;
+        }
+        #buttons {
+            position: fixed;
+            bottom: 4vh;
+            left: 0;
+            right: 0;
+            background: darkslategray;
+            padding: 5px;
+            height: 6vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        button {
+            font-size: 0.5rem;
+            min-width: 40px;
+            background: springgreen;
+            border: none;
+            color: black;
+            padding: 2px;
+            margin: 0 1px;
+        }
+        .main-map { grid-row: 1; min-height: 40vh; }
+        .small-top { grid-row: 2; min-height: 20vh; }
+        .small-bottom { grid-row: 3; min-height: 20vh; }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 2.5fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                height: 90vh;
+            }
+            .main-map { grid-column: 1; grid-row: 1 / 3; min-height: 90vh; }
+            .small-top { grid-column: 2; grid-row: 1; min-height: 45vh; }
+            .small-bottom { grid-column: 2; grid-row: 2; min-height: 45vh; }
+            .imagetitle { font-size: 0.8rem; top: 2%; padding: 2px; }
+            #date, #local { font-size: 0.8rem; }
+            #utc { font-size: 1rem; }
+            #clock { height: 5vh; }
+            #buttons { bottom: 5vh; height: 5vh; }
+            button { font-size: 0.7rem; min-width: 50px; padding: 3px; margin: 0 2px; }
+        }
+
+        @media (min-width: 768px) and (orientation: landscape) {
+            .grid { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr; }
+            .main-map { grid-column: 1; grid-row: 1; min-height: 80vh; }
+            .small-top { grid-column: 2; grid-row: 1; min-height: 40vh; }
+            .small-bottom { display: none; }
+        }
+
         .fullscreen-overlay {
             display: none;
             position: fixed;
@@ -54,12 +151,6 @@
         .fullscreen-image {
             max-width: 90%;
             max-height: 90%;
-        }
-        /* Custom styling for spanning container */
-        .imagecontainer[style*="grid-column: span 1"] {
-            grid-column: span 1;
-            grid-row: span 1;
-            min-height: 20vh;
         }
     </style>
     <script>
@@ -82,48 +173,45 @@
             const img = document.createElement('img');
             img.className = 'fullscreen-image';
             img.src = imageSrc;
-            img.onclick = () => document.body.removeChild(overlay); // Close on image click
+            img.onclick = () => document.body.removeChild(overlay);
             overlay.appendChild(img);
             document.body.appendChild(overlay);
             overlay.style.display = 'flex';
             overlay.onclick = (e) => {
-                if (e.target === overlay) document.body.removeChild(overlay); // Close on overlay click
+                if (e.target === overlay) document.body.removeChild(overlay);
             };
         }
     </script>
 </head>
 <body>
     <div class="grid">
-        <div class="imagecontainer" style="grid-column: 1 / span 1; grid-row: 1 / span 2;">
+        <div class="imagecontainer main-map">
             <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=7&overlay=snowAccu&product=ecmwf&level=surface&lat=38.885&lon=-107.782&detailLat=39.468&detailLon=-106.162&marker=true" frameborder="0"></iframe>
             <div class="imagetitle">Snow Precip Forecast</div>
-            <!-- Note: Use the slider to set to 'Next 24 hours' for the desired view -->
         </div>
-        <div class="imagecontainer" style="grid-column: 2 / span 1; grid-row: 1 / span 1; min-height: 20vh;">
+        <div class="imagecontainer small-top">
             <img src="https://radar.weather.gov/ridge/standard/KFTG_loop.gif" alt="CO Radar" onclick="showFullScreen(this.src)">
             <div class="imagetitle">CO Radar</div>
         </div>
-        <div class="imagecontainer" style="grid-column: 2 / span 1; grid-row: 2 / span 1; min-height: 20vh;">
-            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" style="width: 90%; height: 98%; object-fit: contain;" onclick="showFullScreen(this.src)">
+        <div class="imagecontainer small-bottom">
+            <img src="https://www.wpc.ncep.noaa.gov/noaa/noaa.gif" alt="NOAA Weather Map" onclick="showFullScreen(this.src)">
             <div class="imagetitle">NOAA Weather Map</div>
-        </div>
-        <div class="imagecontainer" style="grid-column: 2 / span 1; grid-row: 3 / span 1; min-height: 30vh; display: none;"> <!-- Hidden placeholder -->
         </div>
     </div>
     <div id="clock">
         <span id="date"></span> &nbsp; <span id="utc"></span> &nbsp; <span id="local"></span>
     </div>
     <div id="buttons">
-        <button onclick="window.open('https://www.arapahoebasin.com/mountain-cams/')">Abasin</button>
+        <button onclick="window.open('https://www.arapahoebasin.com/mountain-cams/')">A-Basin</button>
         <button onclick="window.open('https://www.coppercolorado.com/the-mountain/webcams?season=summer')">Copper</button>
-        <button onclick="window.open('https://forecast.weather.gov/MapClick.php?lon=-106.16377257462592&lat=39.48701208217648')">Copper MTN</button>
-        <button onclick="window.open('https://www.wcc.nrcs.usda.gov/ftpref/support/states/CO/products/#state=co&element=wteq')">CO</button>
-        <button onclick="window.open('https://www.weather.gov/bou/co_snowpack')">CO_</button>
-        <button onclick="window.open('https://www.avalanche.org')">Av Bulletin</button>
-        <button onclick="window.open('https://www.colorado.gov/avalanche')">CAIC </button>
-        <button onclick="window.open('https://powderchasers.com/')">Powchase</button>
+        <button onclick="window.open('https://forecast.weather.gov/MapClick.php?lon=-106.16377257462592&lat=39.48701208217648')">C-MTN</button>
+        <button onclick="window.open('https://www.wcc.nrcs.usda.gov/ftpref/support/states/CO/products/#state=co&element=wteq')">Snow</button>
+        <button onclick="window.open('https://www.weather.gov/bou/co_snowpack')">Depth</button>
+        <button onclick="window.open('https://www.avalanche.org')">AvWx</button>
+        <button onclick="window.open('https://www.colorado.gov/avalanche')">CAIC</button>
+        <button onclick="window.open('https://powderchasers.com/')">Pow</button>
     </div>
-    <a href="https://www.opensnow.com/state/co" target="_blank" style="display: block; text-align: center; color: springgreen; font-size: 0.9rem; margin: 5px 0; text-decoration: none;">OpenSnow Colorado</a>
-    <a href="https://powderchasers.com/" target="_blank" style="display: block; text-align: center; color: springgreen; font-size: 0.9rem; margin: 0; text-decoration: none;">Powderchasers</a>
+    <a href="https://www.opensnow.com/state/co" target="_blank" style="display: block; text-align: center; color: springgreen; font-size: 0.6rem; margin: 5px 0; text-decoration: none;">OpenSnow CO</a>
+    <a href="https://powderchasers.com/" target="_blank" style="display: block; text-align: center; color: springgreen; font-size: 0.6rem; margin: 0; text-decoration: none;">Powderchasers</a>
 </body>
 </html>
