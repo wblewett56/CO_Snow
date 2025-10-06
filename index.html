@@ -58,7 +58,7 @@
         .grid {
             display: grid;
             grid-template-columns: 1fr;
-            grid-template-rows: 3fr 1fr; /* Adjusted for two containers */
+            grid-template-rows: 4fr 1fr; /* Increased main-map vertical space */
             gap: 1px; /* Reduced gap for compactness */
             width: 100vw;
             height: calc(100vh - 12vh); /* Reserve space for clock (4vh), buttons (5vh), links (3vh) */
@@ -167,7 +167,7 @@
 
         @media (min-width: 768px) {
             .grid {
-                grid-template-columns: 4fr 1fr; /* Increased main-map width to 4fr */
+                grid-template-columns: 4fr 1fr; /* Maintained larger main-map width */
                 grid-template-rows: 1fr; /* Adjusted for two containers */
                 height: calc(100vh - 11vh); /* Slightly more space for larger screens */
                 max-height: calc(100vh - 11vh);
@@ -184,7 +184,7 @@
 
         @media (min-width: 768px) and (orientation: landscape) {
             .grid {
-                grid-template-columns: 4fr 1fr; /* Increased main-map width to 4fr */
+                grid-template-columns: 4fr 1fr; /* Maintained larger main-map width */
                 grid-template-rows: 1fr;
                 height: calc(100vh - 11vh);
                 max-height: calc(100vh - 11vh);
@@ -195,7 +195,7 @@
 
         @media (max-width: 500px) {
             .grid {
-                grid-template-rows: 3fr 1fr; /* Consistent tight proportions */
+                grid-template-rows: 4fr 1fr; /* Increased main-map vertical space */
                 height: calc(100vh - 13vh); /* Extra margin for links */
                 max-height: calc(100vh - 13vh);
             }
